@@ -43,7 +43,7 @@ tennis.replace(np.NaN, 0, inplace=True)
 # Extract Features' names
 cols = tennis.columns[2:]
 # Extract Player 1 names
-player1_names = tennis['Player2']
+player1_names = tennis['Player1']
 # Extract unique player 1 names and pair them to an integer
 player1_unique = np.unique(player1_names)
 players_dict = dict(zip(player1_unique, range(len(player1_unique))))
