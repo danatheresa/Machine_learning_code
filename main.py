@@ -1,6 +1,7 @@
 # test git
 print("Hello World!")
 
+import functions as f
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -9,10 +10,36 @@ from scipy.linalg import svd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
+
 # Data import
 wimbledon_path = "./data/tennis/Wimbledon-men-2013.csv"
+women_path = "data/tennis/Wimbledon-women-2013.csv"
+df2_path = "data/tennis/tennis12.csv"
+
 tennis = pd.read_csv(wimbledon_path)
 tennis.rename(columns=lambda x: x.replace(".1", "1").replace(".2","2"), inplace=True)
+
+women_tennis = pd.read_csv(women_path)
+women_tennis.rename(columns=lambda x: x.replace(".1", "1").replace(".2", "2"), inplace=True)
+
+#Modifying dataframe such that they have only one column with players names
+tennis_extended_men = pd.read_csv(df2_path, sep=',')
+
+to_drop1 = [column for column in women_tennis.columns if "2" in column]
+to_drop1.extend(['Round', 'Result', 'ST111'])
+to_drop2 = [column for column in women_tennis.columns if "1" in column]
+to_drop2.extend(['Round', 'Result'])
+
+women1_int = women_tennis.drop(columns=to_drop1)
+women1_int.rename(columns=lambda x: x.replace("1", ""), inplace=True)
+women2_int = women_tennis.drop(columns=to_drop2)
+women2_int.rename(columns=lambda x: x.replace("2", ""), inplace=True)
+
+women_extended = pd.concat([women1_int.reset_index(drop=True), women2_int.reset_index(drop=True)], axis= 0, ignore_index = True)
+women_extended.to_csv("data/tennis/women12.csv", sep=',', index=False)
+
+
+tennis_extended_men.rename(columns={'Player1': 'Player'}, inplace=True)
 
 
 fig0 = px.scatter(tennis, x='Player1', y='FSP1', color='FSW1', labels={'FSW1': 'First Serve Win'})
@@ -35,6 +62,24 @@ fig2 = px.scatter(tennis, x='FSW1', y='ACE1', )
 fig0.show()
 fig1.show()
 fig2.show()
+
+# Check if players only appear in 1 column or both
+lst_pl1, lst_pl2 = tennis['Player1'], tennis['Player2']
+
+pl1_unique_lst = np.unique(lst_pl1)
+pl2_unique_lst = np.unique(lst_pl2)
+
+pl1_in_pl2_check = np.isin(pl1_unique_lst, pl2_unique_lst)
+sum_pl1 = sum(pl1_in_pl2_check)
+pl2_in_pl1_check = np.isin(pl2_unique_lst, pl1_unique_lst)
+sum_pl2 = sum(pl2_in_pl1_check)
+print(len(pl1_in_pl2_check))
+
+
+
+
+
+
 
 # PCA Analysis
 
@@ -103,3 +148,7 @@ fig.update_layout(
 # Show the plot
 fig.show()
 a = 0
+
+
+y_men, men_name, Z_men_ext = f.PCA(tennis_extended_men, 'Player', (1,2), 1, title="Wimbledon 2013 Men's torunament")
+y_women, women_name, Z_wom_ext = f.PCA(women_extended, 'Player', (1,2), 1, title="Wimbledon 2013 Women's tournament")
