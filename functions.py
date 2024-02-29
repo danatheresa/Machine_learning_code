@@ -3,8 +3,12 @@ import pandas as pd
 from scipy.linalg import svd 
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+import plotly.io as pio
 
-def plot_pca_scatter(Z, y, name_unique, i, j, title):
+def plot_pca_scatter(Z, y, name_unique,
+                    comps: tuple,
+                    title: str
+                        ):
     """
     Plot PCA scatter plot.
 
@@ -23,7 +27,7 @@ def plot_pca_scatter(Z, y, name_unique, i, j, title):
     """
 
     C = len(name_unique)  # Number of classes
-
+    i, j = comps
     # Initialize subplot
     fig = make_subplots()
 
@@ -126,6 +130,11 @@ def PCA(df: pd.DataFrame,
         )
 
         # Show the plot
+        save_path_eps = f"./Output Pics/PCA/EPS/PC{i+1}_PC{j+1}.eps"
+        save_path_png = f"./Output Pics/PCA/PNG/PC{i+1}_PC{j+1}.png"
+        # pio.write_image(fig, save_path_eps, format='eps', engine='kaleido', scale=1)
+        fig.write_image(save_path_eps, format='eps')
+        pio.write_image(fig, save_path_png, format='png', width=800, height=600)
         fig.show()
 
     return y, name_unique, Z

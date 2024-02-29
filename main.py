@@ -9,7 +9,7 @@ import numpy as np
 from scipy.linalg import svd 
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-
+import plotly.io as pio
 
 # Data import
 wimbledon_path = "./data/tennis/Wimbledon-men-2013.csv"
@@ -74,8 +74,6 @@ sum_pl1 = sum(pl1_in_pl2_check)
 pl2_in_pl1_check = np.isin(pl2_unique_lst, pl1_unique_lst)
 sum_pl2 = sum(pl2_in_pl1_check)
 print(len(pl1_in_pl2_check))
-
-
 
 
 
@@ -152,3 +150,64 @@ a = 0
 
 y_men, men_name, Z_men_ext = f.PCA(tennis_extended_men, 'Player', (1,2), 1, title="Wimbledon 2013 Men's torunament")
 y_women, women_name, Z_wom_ext = f.PCA(women_extended, 'Player', (1,2), 1, title="Wimbledon 2013 Women's tournament")
+
+data_plot_men = {
+    'y': y_men,
+    'names': men_name,
+    'Z': Z_men_ext
+}
+
+data_plot_women = {
+    'y': y_women,
+    'names': women_name,
+    'Z': Z_wom_ext 
+}
+
+
+# Principal components to be plotted:
+i, j = 0, 1
+
+# Plot
+fig3 = make_subplots()
+for c in range(len(men_name)):
+
+    cm = y_men == c
+    fig3.add_trace(go.Scatter(
+        x = Z_men_ext[cm, i],
+        y = Z_men_ext[cm, j],
+        mode = 'markers',
+        marker = dict(opacity=0.7, color='#636EFA'),
+        name="Men" if c == 0 else None,
+        showlegend=True if c == 0 else False
+    ))
+
+
+for c in range(len(women_name)):
+
+    cm = y_women == c
+    fig3.add_trace(go.Scatter(
+        x = Z_wom_ext[cm, i],
+        y = Z_wom_ext[cm, j],
+        mode = 'markers',
+        marker = dict(opacity=0.7, color='#EF553B'),
+        name="Women" if c == 0 else None,
+        showlegend=True if c == 0 else False
+    ))
+
+
+fig3.update_layout(
+    title="Men/Women PCA, Wimbledon 2013",
+    xaxis=dict(title=f"PC{i+1}"),
+    yaxis=dict(title=f"PC{j+1}"),
+    showlegend=True
+)
+
+
+sv_pth_png = f"./Output Pics/PCA/PNG/MW/Men_Women_PC{i+1}_{j+1}.png"
+sv_pth_eps = f"./Output Pics/PCA/EPS/MW/Men_Women_PC{i+1}_{j+1}.eps"
+
+pio.write_image(fig3, sv_pth_png, format='png', width=800, height=600) 
+# pio.write_image(fig3, sv_pth_eps, format='eps', engine='kaleido', scale=1) 
+fig3.write_image(sv_pth_eps, format='eps', scale=1)
+fig3.show()
+
